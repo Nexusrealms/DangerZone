@@ -5,8 +5,10 @@
 	"name": "DangerZone",
 	"description": "This is an example description! Tell everyone what your mod is about!",
 	"authors": [
-		"Me!"
+		"Flexhd",
+		"Farpo"
 	],
+	"accessWidener" : "dangerzone.accesswidener",
 	"contact": {
 		"homepage": "https://fabricmc.net/",
 		"sources": "https://github.com/FabricMC/fabric-example-mod"
@@ -16,21 +18,20 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"de.nexusrealms.de.DangerZone"
+			"de.nexusrealms.dangerzone.DangerZone"
 		],
 		"client": [
-			"de.nexusrealms.de.DangerZoneClient"
+			"de.nexusrealms.dangerzone.client.DangerZoneClient"
+		],
+		"cardinal-components-world": [
+			"de.nexusrealms.dangerzone.DangerZone"
 		],
 		"fabric-datagen": [
-			"de.nexusrealms.de.DangerZoneDataGenerator"
+			"de.nexusrealms.dangerzone.datagen.DangerZoneDataGenerator"
 		]
 	},
 	"mixins": [
-		"dangerzone.mixins.json",
-		{
-			"config": "dangerzone.client.mixins.json",
-			"environment": "client"
-		}
+		"dangerzone.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.16.12",
@@ -40,5 +41,10 @@
 	},
 	"suggests": {
 		"another-mod": "*"
+	},
+	"custom": {
+		"cardinal-components": [
+			"dangerzone:zones"
+		]
 	}
 }
