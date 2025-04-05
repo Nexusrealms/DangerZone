@@ -34,10 +34,9 @@ public class DamageZoneEffect implements ZoneEffect {
         player.sendMessage(Text.literal("§cYou are taking damage in the " + zone.getName() + " danger zone!"), true);
         
         // Get the registry for damage types
-        RegistryKey<DamageType> damageTypeKey = RegistryKey.of(
-                RegistryKeys.DAMAGE_TYPE,
-                new Identifier(DangerZone.MOD_ID, "danger_zone")
-        );
+        // Fixed: Use the correct method signature for RegistryKey.of and Identifier creation
+        Identifier damageId = Identifier.of(DangerZone.MOD_ID, "danger_zone");
+        RegistryKey<DamageType> damageTypeKey = RegistryKey.of(RegistryKeys.DAMAGE_TYPE, damageId);
         
         // Get the damage source from the registry
         // We're using a fallback to regular damage if our type isn't registered

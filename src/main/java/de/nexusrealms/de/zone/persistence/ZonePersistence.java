@@ -37,7 +37,8 @@ public class ZonePersistence {
      * Saves all zones to disk.
      */
     public static void saveZones(MinecraftServer server) {
-        File worldDirectory = server.getSavePath().resolve("data").toFile();
+        // In 1.21.1, we use the server's getRunDirectory for storage
+        File worldDirectory = new File(server.getRunDirectory(), "data");
         if (!worldDirectory.exists() && !worldDirectory.mkdirs()) {
             DangerZone.LOGGER.error("Failed to create data directory for saving zones");
             return;
@@ -79,7 +80,8 @@ public class ZonePersistence {
      * Loads all zones from disk.
      */
     public static void loadZones(MinecraftServer server) {
-        File worldDirectory = server.getSavePath().resolve("data").toFile();
+        // In 1.21.1, we use the server's getRunDirectory for storage
+        File worldDirectory = new File(server.getRunDirectory(), "data");
         File zonesFile = new File(worldDirectory, ZONES_FILE);
         
         if (!zonesFile.exists()) {
@@ -127,7 +129,15 @@ public class ZonePersistence {
                 // Parse the dimension
                 RegistryKey<World> dimension;
                 try {
-                    Identifier dimId = new Identifier(dimensionId);
+                    // Split the dimension identifier correctly
+                    String[] parts = dimensionId.split(":");
+                    Identifier dimId;
+                    if (parts.length == 2) {
+                        dimId = new Identifier(parts[0], parts[1]);
+                    } else {
+                        dimId = new Identifier("minecraft", dimensionId);
+                    }
+                    
                     dimension = RegistryKey.of(RegistryKeys.WORLD, dimId);
                 } catch (Exception e) {
                     DangerZone.LOGGER.warn("Invalid dimension: {}, using overworld", dimensionId);

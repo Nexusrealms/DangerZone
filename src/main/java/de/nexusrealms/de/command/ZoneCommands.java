@@ -119,6 +119,9 @@ public class ZoneCommands {
         
         // Check if this chunk is already in the zone
         if (zone.containsChunk(chunkPos)) {
+            source.sendFeedback(() -> Text.literal("§cThis chunk is already part of zone: " + name), false);
+            return 0;
+        }
         
         // Add the chunk to the zone
         ZoneManager.getInstance().addChunkToZone(zone.getId(), chunkPos);
@@ -139,8 +142,9 @@ public class ZoneCommands {
         
         Zone zone = targetZone.get();
         
-        // Get current chunk position
-        ChunkPos chunkPos = new ChunkPos(source.getPosition());
+        // Get current chunk position using BlockPos instead of directly from Vec3d
+        BlockPos blockPos = BlockPos.ofFloored(source.getPosition());
+        ChunkPos chunkPos = new ChunkPos(blockPos);
         
         // Check if this chunk is in the zone
         if (!zone.containsChunk(chunkPos)) {
@@ -168,8 +172,9 @@ public class ZoneCommands {
         // Display all zones
         source.sendFeedback(() -> Text.literal("§6===== Danger Zones ====="), false);
         for (Zone zone : zones) {
-            source.sendFeedback(() -> Text.literal("§e- " + zone.getName() + " (" + zone.getType().getId() + ") - " 
-                    + zone.getChunks().size() + " chunks"), false);
+            final Zone finalZone = zone; // Make zone effectively final for the lambda
+            source.sendFeedback(() -> Text.literal("§e- " + finalZone.getName() + " (" + finalZone.getType().getId() + ") - " 
+                    + finalZone.getChunks().size() + " chunks"), false);
         }
         
         return zones.size();
@@ -206,11 +211,12 @@ public class ZoneCommands {
         
         // Display zone information
         Zone zone = targetZone.get();
-        source.sendFeedback(() -> Text.literal("§6===== Zone: " + zone.getName() + " ====="), false);
-        source.sendFeedback(() -> Text.literal("§eID: " + zone.getId()), false);
-        source.sendFeedback(() -> Text.literal("§eType: " + zone.getType().getId() + " - " + zone.getType().getDescription()), false);
-        source.sendFeedback(() -> Text.literal("§eDimension: " + zone.getDimension().getValue()), false);
-        source.sendFeedback(() -> Text.literal("§eChunks: " + zone.getChunks().size()), false);
+        final Zone finalZone = zone; // Make zone effectively final for the lambda
+        source.sendFeedback(() -> Text.literal("§6===== Zone: " + finalZone.getName() + " ====="), false);
+        source.sendFeedback(() -> Text.literal("§eID: " + finalZone.getId()), false);
+        source.sendFeedback(() -> Text.literal("§eType: " + finalZone.getType().getId() + " - " + finalZone.getType().getDescription()), false);
+        source.sendFeedback(() -> Text.literal("§eDimension: " + finalZone.getDimension().getValue()), false);
+        source.sendFeedback(() -> Text.literal("§eChunks: " + finalZone.getChunks().size()), false);
         
         return 1;
     }

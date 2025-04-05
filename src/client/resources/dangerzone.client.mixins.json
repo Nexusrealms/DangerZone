@@ -3,7 +3,8 @@
 	"package": "de.nexusrealms.de.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"ExampleClientMixin"
+		"ExampleClientMixin",
+		"FogRenderMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
