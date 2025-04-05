@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "dangerzone",
+	"version": "${version}",
+	"name": "DangerZone",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/dangerzone/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"de.nexusrealms.de.DangerZone"
+		],
+		"client": [
+			"de.nexusrealms.de.DangerZoneClient"
+		],
+		"fabric-datagen": [
+			"de.nexusrealms.de.DangerZoneDataGenerator"
+		]
+	},
+	"mixins": [
+		"dangerzone.mixins.json",
+		{
+			"config": "dangerzone.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.12",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
