@@ -2,6 +2,7 @@ package de.nexusrealms.dangerzone.network;
 
 import de.nexusrealms.dangerzone.DangerZone;
 import de.nexusrealms.dangerzone.zone.ZoneComponent;
+import de.nexusrealms.dangerzone.zone.effect.ZoneEffect;
 import io.netty.buffer.ByteBuf;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.network.codec.PacketCodec;
@@ -15,7 +16,7 @@ public record ExitZonePacket(UUID zoneId) implements ReceiverPacket<ClientPlayNe
     public static final PacketCodec<ByteBuf, ExitZonePacket> PACKET_CODEC = Uuids.PACKET_CODEC.xmap(ExitZonePacket::new, ExitZonePacket::zoneId);
     @Override
     public void onReceive(ClientPlayNetworking.Context context) {
-        context.player().getWorld().getComponent(ZoneComponent.KEY).getZone(zoneId).ifPresent(zone -> zone.onPlayerExit(context.player()));
+        context.player().getWorld().getComponent(ZoneComponent.KEY).getZone(zoneId).ifPresent(zone -> zone.performEffectActions(context.player(), ZoneEffect::unapplyClient));
     }
 
     @Override

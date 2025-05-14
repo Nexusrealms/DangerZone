@@ -3,16 +3,20 @@ package de.nexusrealms.dangerzone.zone;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import de.nexusrealms.dangerzone.DangerZone;
+import de.nexusrealms.dangerzone.network.EnterZonePacket;
+import de.nexusrealms.dangerzone.network.ExitZonePacket;
+import de.nexusrealms.dangerzone.zone.effect.ZoneEffect;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Uuids;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.world.World;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Represents a danger zone that consists of chunks and can have various effects.
@@ -80,16 +84,24 @@ public class Zone {
     public void setType(ZoneType type) {
         this.type = type;
     }
-    public void onPlayerEnter(PlayerEntity player){
-        getType().effects().forEach(zoneEffect -> zoneEffect.apply(player, this, player.getWorld()));
+    public void onPlayerEnter(ServerPlayerEntity player){
+        performEffectActions(player, ZoneEffect::applyServer);
+        ServerPlayNetworking.send(player, new EnterZonePacket(getId()));
     }
-    public void onPlayerExit(PlayerEntity player){
-        getType().effects().forEach(zoneEffect -> zoneEffect.unapply(player, this, player.getWorld()));
+    public void onPlayerExit(ServerPlayerEntity player){
+        performEffectActions(player, ZoneEffect::unapplyServer);
+        ServerPlayNetworking.send(player, new ExitZonePacket(getId()));
+    }
+    public void performEffectActions(PlayerEntity player, ZoneEffect.ZoneEffectApplicator applicator){
+        getType().effects().forEach(zoneEffect -> applicator.apply(zoneEffect, player, this, player.getWorld()));
     }
     /**
      * Checks if the given chunk position is within this zone.
      */
     public boolean isInZone(ChunkPos pos) {
         return chunks.contains(pos);
+    }
+    public <T extends ZoneEffect> Collection<T> getEffects(Class<T> clazz){
+        return (Collection<T>) type.effects().stream().filter(effect -> effect.getClass() == clazz).collect(Collectors.toList());
     }
 }

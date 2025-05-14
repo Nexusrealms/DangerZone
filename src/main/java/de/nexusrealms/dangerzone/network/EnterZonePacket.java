@@ -17,7 +17,7 @@ public record EnterZonePacket(UUID zoneId) implements ReceiverPacket<ClientPlayN
     public static final PacketCodec<ByteBuf, EnterZonePacket> PACKET_CODEC = Uuids.PACKET_CODEC.xmap(EnterZonePacket::new, EnterZonePacket::zoneId);
     @Override
     public void onReceive(ClientPlayNetworking.Context context) {
-        context.player().getWorld().getComponent(ZoneComponent.KEY).getZone(zoneId).ifPresent(zone -> zone.onPlayerEnter(context.player()));
+        context.player().getWorld().getComponent(ZoneComponent.KEY).getZone(zoneId).ifPresent(zone -> zone.performEffectActions(context.player(), ZoneEffect::applyClient));
     }
 
     @Override

@@ -12,6 +12,7 @@ import de.nexusrealms.dangerzone.zone.ZoneType;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
+import net.minecraft.command.argument.ColumnPosArgumentType;
 import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.CommandManager;
@@ -42,7 +43,11 @@ public class ZoneCommands {
                 // Add current chunk to a zone: /zone add <name>
                 .then(CommandManager.literal("add")
                         .then(CommandManager.argument("name", StringArgumentType.string())
-                                .executes(ZoneCommands::addChunkToZone)))
+                                .executes(ZoneCommands::addChunkToZone)
+                                .then(CommandManager.literal("area")
+                                        .then(CommandManager.argument("a", ColumnPosArgumentType.columnPos())
+                                                .then(CommandManager.argument("b", ColumnPosArgumentType.columnPos())
+                                                        .executes(ZoneCommands::addAreaToZone))))))
 
                 // Remove current chunk from a zone: /zone remove <name>
                 .then(CommandManager.literal("remove")
@@ -122,6 +127,37 @@ public class ZoneCommands {
         source.sendFeedback(() -> Text.literal("§aAdded chunk " + chunkPos.x + ", " + chunkPos.z + " to zone: " + name), true);
         return 1;
     }
+    private static int addAreaToZone(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+        ServerCommandSource source = context.getSource();
+        String name = StringArgumentType.getString(context, "name");
+        ZoneComponent component = source.getWorld().getComponent(ZoneComponent.KEY);
+
+        // Find the zone
+        Optional<Zone> targetZone = component.findZoneByName(name);
+        if (targetZone.isEmpty()) {
+            source.sendFeedback(() -> Text.literal("§cZone not found: " + name), false);
+            return 0;
+        }
+
+        Zone zone = targetZone.get();
+        ChunkPos a = ColumnPosArgumentType.getColumnPos(context, "a").toChunkPos();
+        ChunkPos b = ColumnPosArgumentType.getColumnPos(context, "b").toChunkPos();
+        for (int x = a.x; x <= b.x; x++){
+            for (int z = a.z; z <= b.z; z++){
+                ChunkPos pos = new ChunkPos(x, z);
+                if (zone.containsChunk(pos)) {
+                    source.sendFeedback(() -> Text.literal("§cThis chunk is already part of zone: " + name), false);
+                    continue;
+                }
+                // Add the chunk to the zone
+                zone.addChunk(pos);
+                ZoneComponent.KEY.sync(context.getSource().getWorld());
+                source.sendFeedback(() -> Text.literal("§aAdded chunk " + pos.x + ", " + pos.z + " to zone: " + name), true);
+            }
+        }
+        // Check if this chunk is already in the zone
+        return 1;
+    }
     private static int enterZone(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
         ServerCommandSource source = context.getSource();
         String name = StringArgumentType.getString(context, "name");
@@ -136,7 +172,6 @@ public class ZoneCommands {
 
         Zone zone = targetZone.get();
         zone.onPlayerEnter(context.getSource().getPlayer());
-        ServerPlayNetworking.send(context.getSource().getPlayer(), new EnterZonePacket(zone.getId()));
         source.sendFeedback(() -> Text.literal("§aEntered zone " + name), true);
         return 1;
     }
@@ -154,7 +189,6 @@ public class ZoneCommands {
 
         Zone zone = targetZone.get();
         zone.onPlayerExit(context.getSource().getPlayer());
-        ServerPlayNetworking.send(context.getSource().getPlayer(), new ExitZonePacket(zone.getId()));
         source.sendFeedback(() -> Text.literal("§cExited zone " + name), true);
         return 1;
     }

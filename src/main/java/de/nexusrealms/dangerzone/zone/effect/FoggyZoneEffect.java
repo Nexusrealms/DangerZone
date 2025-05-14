@@ -15,13 +15,13 @@ public class FoggyZoneEffect implements ZoneEffect {
     private static final String ID = "foggy";
     
     @Override
-    public void apply(PlayerEntity player, Zone zone, World world) {
+    public void applyClient(PlayerEntity player, Zone zone, World world) {
         if(!(world instanceof ClientWorld)) return;
         DangerZoneClient.isInZoneFog = true;
     }
 
     @Override
-    public void unapply(PlayerEntity player, Zone zone, World world) {
+    public void unapplyClient(PlayerEntity player, Zone zone, World world) {
         if(!(world instanceof ClientWorld)) return;
         DangerZoneClient.isInZoneFog = false;
     }

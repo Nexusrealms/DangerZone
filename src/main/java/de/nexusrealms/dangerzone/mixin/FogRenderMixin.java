@@ -33,7 +33,7 @@ public class FogRenderMixin {
 
             // Set fog parameters
             fogData.fogStart = 0.0F;
-            fogData.fogEnd = 2.0F;
+            fogData.fogEnd = 1.0F;
             //fogData.fogShape = FogShape.SPHERE;
 
             // Set fog color (slightly bluish mist)
